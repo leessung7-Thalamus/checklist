@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>신입직원 온보딩 체크리스트 — 서울재활병원</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; padding: 2rem 1rem; }
+  .page { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+  .sub { font-size: 13px; color: #888; margin-bottom: 1.5rem; }
+  .meta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .meta-wrap { display: flex; align-items: center; gap: 8px; }
+  .meta-label { font-size: 13px; color: #666; white-space: nowrap; }
+  .meta-input { font-size: 13px; border: 1px solid #ddd; border-radius: 8px; padding: 5px 10px; background: #fff; height: 32px; width: 150px; }
+  .progress-box { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+  .prog-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .prog-label { font-size: 13px; color: #888; }
+  .prog-count { font-size: 22px; font-weight: 600; }
+  .prog-track { height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+  .prog-fill { height: 100%; background: #1D9E75; border-radius: 4px; transition: width 0.4s; }
+  .filter-row { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .filter-btn { font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 1px solid #ddd; background: #fff; color: #666; cursor: pointer; transition: all 0.15s; }
+  .filter-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .reset-btn { font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 1px solid #ddd; background: #fff; color: #999; cursor: pointer; margin-left: auto; }
+  .cat-block { margin-bottom: 1rem; border: 1px solid #e8e8e8; border-radius: 12px; overflow: hidden; background: #fff; }
+  .cat-header { padding: 0.75rem 1.25rem; display: flex; align-items: center; justify-content: space-between; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+  .cat-left { display: flex; align-items: center; gap: 10px; }
+  .cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .cat-title { font-size: 14px; font-weight: 600; }
+  .cat-prog { font-size: 12px; color: #999; }
+  .item-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 1.25rem; border-top: 1px solid #f5f5f5; cursor: pointer; transition: background 0.15s; }
+  .item-row:hover { background: #fafafa; }
+  .item-row.checked { background: #f0faf6; }
+  .checkbox { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid #ccc; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .checkbox.on { background: #1D9E75; border-color: #1D9E75; }
+  .checkmark { width: 10px; height: 6px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translateY(-1px); display: none; }
+  .checkbox.on .checkmark { display: block; }
+  .item-text { flex: 1; }
+  .item-name { font-size: 14px; line-height: 1.4; }
+  .item-name.done { color: #aaa; text-decoration: line-through; }
+  .item-sub { font-size: 12px; color: #999; margin-top: 2px; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; margin-top: 3px; }
+  .badge-r { background: #fff0f0; color: #c0392b; }
+  .badge-o { background: #eef4ff; color: #2355a0; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .filter-row, .reset-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <p style="font-size:13px;color:#999;margin-bottom:6px;">서울재활병원 · 신경계물리치료팀</p>
+  <h1>신입직원 온보딩 체크리스트</h1>
+  <p class="sub">항목을 클릭해 완료 표시하세요</p>
+
+  <div class="meta-row">
+    <div class="meta-wrap"><span class="meta-label">직원 이름</span><input class="meta-input" type="text" placeholder="홍길동" /></div>
+    <div class="meta-wrap"><span class="meta-label">입사일</span><input class="meta-input" type="date" /></div>
+    <div class="meta-wrap"><span class="meta-label">담당 교육자</span><input class="meta-input" type="text" placeholder="이성철 팀장" /></div>
+  </div>
+
+  <div class="progress-box">
+    <div class="prog-top">
+      <span class="prog-label">전체 진행률</span>
+      <span class="prog-count" id="prog-count">0 / 0</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('all',this)">전체</button>
+    <button class="filter-btn" onclick="setFilter('required',this)">필수</button>
+    <button class="filter-btn" onclick="setFilter('optional',this)">권장</button>
+    <button class="filter-btn" onclick="setFilter('undone',this)">미완료</button>
+    <button class="reset-btn" onclick="resetAll()">전체 초기화</button>
+  </div>
+
+  <div id="root"></div>
+</div>
+
+<script>
+const CATS = [
+  { id:'orientation', title:'1. 입사 오리엔테이션', color:'#378ADD', items:[
+    {id:'o1',name:'병원 소개 및 비전·미션 교육',sub:'원장 또는 팀장 진행',r:true},
+    {id:'o2',name:'조직도 및 부서별 역할 안내',sub:'팀 구성원 소개 포함',r:true},
+    {id:'o3',name:'취업규칙·복무 규정 숙지',sub:'출퇴근, 휴가, 복장 규정',r:true},
+    {id:'o4',name:'개인정보보호 서약서 서명',sub:'환자 정보 보안 필수',r:true},
+    {id:'o5',name:'근무 공간 및 시설 투어',sub:'치료실, 탈의실, 휴게실 등',r:true},
+    {id:'o6',name:'비상 대피로 및 응급 대응 절차 확인',sub:'화재, 낙상 대응 포함',r:true},
+  ]},
+  { id:'admin', title:'2. 행정 및 시스템', color:'#534AB7', items:[
+    {id:'a1',name:'전자의무기록(EMR) 시스템 계정 발급',sub:'초기 비밀번호 변경 필수',r:true},
+    {id:'a2',name:'EMR 기록 작성법 교육',sub:'SOAP 노트, 치료 기록 양식',r:true},
+    {id:'a3',name:'보험 청구 기초 이해',sub:'급여·비급여 항목 구분',r:true},
+    {id:'a4',name:'인트라넷·병원 내부 포털 사용법',sub:'공지, 일정, 자료실',r:false},
+    {id:'a5',name:'근태 관리 시스템 등록',sub:'지문 또는 카드 등록',r:true},
+    {id:'a6',name:'원무팀·행정팀 연락처 숙지',sub:'협조 요청 채널 파악',r:false},
+  ]},
+  { id:'clinical', title:'3. 임상 역량 — 신경계 기초', color:'#0F6E56', items:[
+    {id:'c1',name:'신경계 재활의 기본 원리 교육',sub:'뇌졸중, 파킨슨, 척수손상 등 주요 질환',r:true},
+    {id:'c2',name:'기능적 평가 도구 실습',sub:'K-MBI, Berg Balance Scale, FIM',r:true},
+    {id:'c3',name:'보행 분석 기초 교육',sub:'정상 보행 패턴 vs 이상 보행',r:true},
+    {id:'c4',name:'보조기·보행 보조 기구 사용법',sub:'워커, 지팡이, AFO 착용 지도',r:true},
+    {id:'c5',name:'신경계 물리치료 주요 기법 숙지',sub:'NDT, PNF, Bobath 개요',r:true},
+    {id:'c6',name:'연하장애 기초 이해',sub:'흡인 위험 환자 주의사항',r:false},
+  ]},
+  { id:'gait', title:'4. 보행 훈련 전문 교육', color:'#BA7517', items:[
+    {id:'g1',name:'강도 높은 보행 훈련 원칙 이해',sub:'과제 지향 훈련, 반복성 원칙',r:true},
+    {id:'g2',name:'트레드밀 보행 훈련 장비 사용법',sub:'하중 경감 시스템(BWSTT) 포함',r:true},
+    {id:'g3',name:'보행 훈련 프로토콜 숙지',sub:'병원 자체 표준 프로토콜 확인',r:true},
+    {id:'g4',name:'낙상 예방 수칙 및 환자 안전 교육',sub:'보조 방법, 긴급 상황 대처',r:true},
+    {id:'g5',name:'환자 이송·이동 보조 기술(이동 동작)',sub:'허리 보호 포함',r:true},
+    {id:'g6',name:'보행 훈련 결과 기록 및 목표 설정법',sub:'단기·장기 목표 작성 실습',r:false},
+  ]},
+  { id:'patient', title:'5. 환자 응대 및 커뮤니케이션', color:'#993556', items:[
+    {id:'p1',name:'환자 및 보호자 응대 기본 매너',sub:'인사, 설명, 동의 구하기',r:true},
+    {id:'p2',name:'치료 계획 설명 및 동의서 작성 안내',sub:'치료 목적·방법·위험 고지',r:true},
+    {id:'p3',name:'민원·컴플레인 처리 절차',sub:'팀장 보고 체계 포함',r:true},
+    {id:'p4',name:'다직종 협업 방식 이해',sub:'작업치료사, 언어치료사, 의사와 협력',r:false},
+    {id:'p5',name:'입원·외래 환자 차이 이해',sub:'스케줄 관리, 우선순위 조정',r:false},
+  ]},
+  { id:'safety', title:'6. 감염관리 및 안전', color:'#993C1D', items:[
+    {id:'s1',name:'손 위생 및 개인보호장비(PPE) 교육',sub:'5단계 손 씻기, 마스크·장갑 착용',r:true},
+    {id:'s2',name:'의료폐기물 분리배출 규정',sub:'감염성 폐기물 처리 절차',r:true},
+    {id:'s3',name:'낙상 사고 보고 절차',sub:'사고 발생 시 즉시 보고 경로',r:true},
+    {id:'s4',name:'근골격계 부상 예방 교육',sub:'치료사 허리 보호 자세',r:true},
+    {id:'s5',name:'심폐소생술(CPR) 기초 교육',sub:'연 1회 이상 이수 필수',r:true},
+  ]},
+  { id:'growth', title:'7. 성장 및 역량 개발', color:'#3B6D11', items:[
+    {id:'gr1',name:'1개월 수습 평가 계획 수립',sub:'평가 항목·일정 공유',r:true},
+    {id:'gr2',name:'멘토(프리셉터) 배정 및 첫 미팅',sub:'주 1회 피드백 일정 설정',r:true},
+    {id:'gr3',name:'병원 내 정기 교육 일정 안내',sub:'컨퍼런스, 케이스 스터디',r:false},
+    {id:'gr4',name:'외부 학회·보수 교육 안내',sub:'대한물리치료학회 등',r:false},
+    {id:'gr5',name:'보행 훈련 전문가 과정 참여 계획',sub:'원내 6회차 과정 일정 확인',r:false},
+  ]},
+];
+
+let state = {};
+let filter = 'all';
+CATS.forEach(c => c.items.forEach(i => state[i.id] = false));
+
+function setFilter(f, btn) {
+  filter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function resetAll() {
+  if (!confirm('전체 체크를 초기화할까요?')) return;
+  Object.keys(state).forEach(k => state[k] = false);
+  render();
+}
+
+function toggle(id) {
+  state[id] = !state[id];
+  render();
+}
+
+function render() {
+  const all = CATS.flatMap(c => c.items);
+  const done = all.filter(i => state[i.id]).length;
+  document.getElementById('prog-count').textContent = done + ' / ' + all.length;
+  document.getElementById('prog-fill').style.width = Math.round(done / all.length * 100) + '%';
+
+  const root = document.getElementById('root');
+  root.innerHTML = '';
+
+  CATS.forEach(cat => {
+    const visible = cat.items.filter(i => {
+      if (filter === 'required') return i.r;
+      if (filter === 'optional') return !i.r;
+      if (filter === 'undone') return !state[i.id];
+      return true;
+    });
+    if (!visible.length) return;
+
+    const catDone = cat.items.filter(i => state[i.id]).length;
+    const block = document.createElement('div');
+    block.className = 'cat-block';
+    block.innerHTML = `<div class="cat-header">
+      <div class="cat-left">
+        <div class="cat-dot" style="background:${cat.color}"></div>
+        <span class="cat-title">${cat.title}</span>
+      </div>
+      <span class="cat-prog">${catDone} / ${cat.items.length}</span>
+    </div>`;
+
+    visible.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'item-row' + (state[item.id] ? ' checked' : '');
+      row.onclick = () => toggle(item.id);
+      row.innerHTML = `
+        <div class="checkbox ${state[item.id] ? 'on' : ''}"><div class="checkmark"></div></div>
+        <div class="item-text">
+          <div class="item-name ${state[item.id] ? 'done' : ''}">${item.name}</div>
+          <div class="item-sub">${item.sub}</div>
+        </div>
+        <span class="badge ${item.r ? 'badge-r' : 'badge-o'}">${item.r ? '필수' : '권장'}</span>`;
+      block.appendChild(row);
+    });
+
+    root.appendChild(block);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
